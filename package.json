@@ -1,0 +1,20 @@
+{
+  "name": "tinypng_img",
+  "version": "0.0.2",
+  "description": "调用TINYPNG压缩PNG/JPG图片",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "compress",
+    "img"
+  ],
+  "author": "842891024@qq.com",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "request": "^2.61.0"
+  },
+  "devDependencies": {}
+}
