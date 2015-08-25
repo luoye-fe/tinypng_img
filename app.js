@@ -93,7 +93,7 @@ Tinypng.prototype.run = function () {
                     request.get(body.output.url).pipe(fs.createWriteStream(dest+'/'+path.basename(file)));
                 }else{
                     if (body.error === 'TooManyRequests') {
-                        console.log('   此KEY压缩图片数量已达限制,已自动切换到下一个KEY');
+                        console.log('   此KEY压缩图片数量已达限制');
                     } else if (body.error === 'Unauthorized') {
                         console.log('   此KEY不可用');
                     } else {
