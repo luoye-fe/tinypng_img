@@ -63,33 +63,45 @@ Tinypng.prototype.run = function () {
     }
 
     var imgList = [];
-    var data = [];
+    var data = {};
     // data[src] = md5(src);
     // data[src+'/'+img] = md5(src+'/'+img);
     
     if(fs.existsSync(src)){
-        if (!fs.existsSync(src+'/info')) {
+        if (!fs.existsSync(src+'/info.json')) {
             // fs.writeFileSync(src+'/info','','utf-8');
             imgList = getImg(src);
         }else{
-
+            // var info = getInfo(src);
+            // var _imgList = getImg(src);
+            // var imgList = [];
+            // _imgList.forEach(function(img){
+            //     if(md5(img) != info[]){
+            //         imgList.push(img)
+            //     }
+            // })
         };
     }
 
     var index = 0;
     imgList.forEach(function(file){
-        var _current = []
-        _current[0] = file;
-        _current[1] = md5(file);
-        data.push(_current);
+        data[file] = md5(file);
+        // fs.appendFileSync(src+'/info.json','\''+file+'\':{\''+data[file]+'\'}\n');
+        // console.log(file);
+        // console.log(data[file]);
+        // data.push(_current);
         index++;
     })
-    fs.writeFileSync(src+'/info',data);
-    console.log(data);
-
-
-
+    var info = JSON.parse(fs.readFileSync(src+'/info.json','utf-8'))
     
+
+    var data = 
+    [
+        {}
+    ]
+
+    // console.log(info);
+
     // if(imgList.length == 0){
     //     console.log("未发现图片");
     // }else{
@@ -108,9 +120,9 @@ Tinypng.prototype.run = function () {
     //             if(response.statusCode == 201){
     //                 //打印压缩信息：图片名  压缩前大小  压缩后大小  压缩率
     //                 console.log(equiLong('   '+path.basename(file),30).bold.white+equiLong((body.input.size/1024).toFixed(2)+'KB',18).bold.cyan+equiLong((body.output.size/1024).toFixed(2)+'KB',18).bold.green+equiLong((1-(body.output.size/body.input.size)).toFixed(2)+'%',8).bold.green);
-    //                    写入md5信息
+    //                  //写入md5信息
                        
-    //                    data.
+    //                  //data.
     //                 //写入文件
     //                 request.get(body.output.url).pipe(fs.createWriteStream(dest+'/'+path.basename(file)));
     //             }else{
@@ -186,7 +198,16 @@ function md5(file){
     return result;
 }
 
-
+//获取info数组
+function getInfo(src){
+    var result = [];
+    var _info = fs.readFileSync(src+'/info','utf-8').split('\n');
+    for(var i = 0;i<_info.length;i++){
+        __info = _info[i].split(',');
+        result.push(__info);
+    }
+    return result;
+}
 
 module.exports = Tinypng;
 
