@@ -133,3 +133,13 @@ function equiLong(str,len){
 
 
 module.exports = Tinypng;
+
+
+
+
+//调用
+var tingpng = new Tinypng()
+    .src('./')
+    .dest('./')
+    .key('api key')
+    .run()
