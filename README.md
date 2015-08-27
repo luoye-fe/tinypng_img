@@ -1,5 +1,9 @@
 图片压缩之TINYPNG
 
+20150827
+添加检测图片是否被压缩过功能
+
+
 安装方法
 
 	npm install tinypng -g
