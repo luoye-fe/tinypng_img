@@ -1,6 +1,6 @@
 {
   "name": "tinypng_img",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "调用TINYPNG压缩PNG/JPG图片",
   "main": "app.js",
   "scripts": {
@@ -14,9 +14,15 @@
   "license": "ISC",
   "dependencies": {
     "colors": "^1.1.2",
-    "crypto": "0.0.3",
-    "iconv-lite": "^0.4.11",
     "request": "^2.61.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/842891024/tinypng_img.git"
+  },
+  "bugs": {
+    "url": "https://github.com/842891024/tinypng_img/issues"
+  },
+  "homepage": "https://github.com/842891024/tinypng_img"
 }

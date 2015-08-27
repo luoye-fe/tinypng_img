@@ -2,11 +2,6 @@ var fs = require("fs");
 var path = require("path");
 var request = require('request');
 var colors = require('colors');
-//加密模块
-var crypto = require('crypto');
-//转码模块
-var iconv = require('iconv-lite');
-
 
 function Tinypng() {
     if (!(this instanceof Tinypng)) {
@@ -63,80 +58,56 @@ Tinypng.prototype.run = function () {
     }
 
     var imgList = [];
-    var data = {};
-    // data[src] = md5(src);
-    // data[src+'/'+img] = md5(src+'/'+img);
+
     
     if(fs.existsSync(src)){
-        if (!fs.existsSync(src+'/info.json')) {
-            // fs.writeFileSync(src+'/info','','utf-8');
-            imgList = getImg(src);
-        }else{
-            // var info = getInfo(src);
-            // var _imgList = getImg(src);
-            // var imgList = [];
-            // _imgList.forEach(function(img){
-            //     if(md5(img) != info[]){
-            //         imgList.push(img)
-            //     }
-            // })
-        };
+        imgList = getImg(src);
     }
 
-    var index = 0;
-    imgList.forEach(function(file){
-        data[file] = md5(file);
-        // fs.appendFileSync(src+'/info.json','\''+file+'\':{\''+data[file]+'\'}\n');
-        // console.log(file);
-        // console.log(data[file]);
-        // data.push(_current);
-        index++;
-    })
-    var info = JSON.parse(fs.readFileSync(src+'/info.json','utf-8'))
-    
 
-    var data = 
-    [
-        {}
-    ]
+    if(imgList.length == 0){
+        console.log("\n   未发现可压缩图片\n");
+    }else{
+        var len = imgList.length.toString();
+        console.log("\n发现未压缩图片共 "+len.bold.white+" 张，正在压缩···");
+        console.log(equiLong('\n   图片名',28)+equiLong('压缩前',15)+equiLong('压缩后',15)+equiLong('压缩率',8));
+        imgList.forEach(function(file){
+            var input = fs.createReadStream(file)
+            input.pipe(request.post('https://api.tinify.com/shrink',{
+                auth:{
+                    'user':'api',
+                    'pass':key
+                }
+            },function(err,response,body){
+                var body = JSON.parse(body);
+                if(response.statusCode == 201){
+                    //打印压缩信息：图片名  压缩前大小  压缩后大小  压缩率
+                    console.log(equiLong('   '+path.basename(file),30).bold.white+equiLong((body.input.size/1024).toFixed(2)+'KB',18).bold.cyan+equiLong((body.output.size/1024).toFixed(2)+'KB',18).bold.green+equiLong((1-(body.output.size/body.input.size)).toFixed(2)+'%',8).bold.green);
+                    //写入文件
+                    var output = fs.createWriteStream(dest+'/'+path.basename(file));
 
-    // console.log(info);
+                    request.get(body.output.url).pipe(output);
 
-    // if(imgList.length == 0){
-    //     console.log("未发现图片");
-    // }else{
-    //     var len = imgList.length.toString();
-    //     console.log("\n未压缩图片共 "+len.bold.white+" 张，正在压缩···");
-    //     console.log(equiLong('\n   图片名',28)+equiLong('压缩前',15)+equiLong('压缩后',15)+equiLong('压缩率',8));
-    //     imgList.forEach(function(file){
-
-    //         fs.createReadStream(file).pipe(request.post('https://api.tinify.com/shrink',{
-    //             auth:{
-    //                 'user':'api',
-    //                 'pass':key
-    //             }
-    //         },function(err,response,body){
-    //             var body = JSON.parse(body);
-    //             if(response.statusCode == 201){
-    //                 //打印压缩信息：图片名  压缩前大小  压缩后大小  压缩率
-    //                 console.log(equiLong('   '+path.basename(file),30).bold.white+equiLong((body.input.size/1024).toFixed(2)+'KB',18).bold.cyan+equiLong((body.output.size/1024).toFixed(2)+'KB',18).bold.green+equiLong((1-(body.output.size/body.input.size)).toFixed(2)+'%',8).bold.green);
-    //                  //写入md5信息
-                       
-    //                  //data.
-    //                 //写入文件
-    //                 request.get(body.output.url).pipe(fs.createWriteStream(dest+'/'+path.basename(file)));
-    //             }else{
-    //                 if (body.error === 'TooManyRequests') {
-    //                     console.log('   此KEY压缩图片数量已达限制');
-    //                 } else if (body.error === 'Unauthorized') {
-    //                     console.log('   此KEY不可用');
-    //                 } else {
-    //                     console.log(equiLong('   '+path.basename(file),30).bold.white+'压缩出现问题'.bold.red);
-    //                 }
-    //             };
-    //         }));
-    //     })
-    // }
+                    output.on('finish',function(){
+                        //修改文件尾buffer，作为已压缩图片的特征码
+                        var buf = fs.readFileSync(dest+'/'+path.basename(file));
+                        var len = buf.length;
+                        buf[len-1] = '0';
+                        fs.writeFileSync(dest+'/'+path.basename(file),buf);
+                    })
+                    
+                }else{
+                    if (body.error === 'TooManyRequests') {
+                        console.log('   此KEY压缩图片数量已达限制');
+                    } else if (body.error === 'Unauthorized') {
+                        console.log('   此KEY不可用');
+                    } else {
+                        console.log(equiLong('   '+path.basename(file),30).bold.white+'压缩出现问题'.bold.red);
+                    }
+                };
+            }));
+        })
+    }
 
 };
 
@@ -145,12 +116,18 @@ Tinypng.prototype.run = function () {
 function getImg(src){
     var imgList = [];
     if(fs.statSync(src).isFile() && checkImg(src)){
-        imgList.push(src);
+        var buf = fs.readFileSync(src);
+        if(buf[buf.length-1] != '0'){
+            imgList.push(src);             
+        }
     }else if(fs.statSync(src).isDirectory()){
         var _current = fs.readdirSync(src);
         _current.forEach(function(img){
             if(checkImg(img)){
-                imgList.push(src+'/'+img);
+                var buf = fs.readFileSync(src+'/'+img);
+                if(buf[buf.length-1] != '0'){
+                    imgList.push(src+'/'+img);
+                }
             }
         })
     }
@@ -158,15 +135,10 @@ function getImg(src){
 }
 
 
-//校验MD5，不一致的返回数组
-//不一致的话就是没压缩过的
-function checkMd5(file,md5){
-
-}
 
 //判断是否是图片
 function checkImg(file){
-    var imgType = ['.png','.jpg','.jpeg']; 
+    var imgType = ['.png','jpg']; 
     var extName = path.extname(file);
     for(var i = 0;i<imgType.length;i++){
         if(imgType[i] == extName){
@@ -187,15 +159,6 @@ function equiLong(str,len){
         };
         return _str;
     }
-}
-
-//返回md5戳
-function md5(file){
-    var content = fs.readFileSync(file);
-    var md5 = crypto.createHash('md5');
-    md5.update(content);
-    var result = md5.digest('hex');
-    return result;
 }
 
 //获取info数组
