@@ -68,6 +68,8 @@ Tinypng.prototype.run = function () {
     if(imgList.length == 0){
         console.log("\n   未发现可压缩图片\n");
     }else{
+        var saveSize = 0;  //压缩了多少空间
+        var count = 0;   //计数器
         var len = imgList.length.toString();
         console.log("\n发现未压缩图片共 "+len.bold.white+" 张，正在压缩···");
         console.log(equiLong('\n   图片名',28)+equiLong('压缩前',15)+equiLong('压缩后',15)+equiLong('压缩率',8));
@@ -84,6 +86,8 @@ Tinypng.prototype.run = function () {
                     //打印压缩信息：图片名  压缩前大小  压缩后大小  压缩率
                     console.log(equiLong('   '+path.basename(file),30).bold.white+equiLong((body.input.size/1024).toFixed(2)+'KB',18).bold.cyan+equiLong((body.output.size/1024).toFixed(2)+'KB',18).bold.green+equiLong((1-(body.output.size/body.input.size)).toFixed(2)+'%',8).bold.green);
                     //写入文件
+                    var _size = (body.input.size/1024).toFixed(2)-(body.output.size/1024).toFixed(2);
+                    saveSize += _size;
                     var output = fs.createWriteStream(dest+'/'+path.basename(file));
 
                     request.get(body.output.url).pipe(output);
@@ -94,8 +98,11 @@ Tinypng.prototype.run = function () {
                         var len = buf.length;
                         buf[len-1] = '0';
                         fs.writeFileSync(dest+'/'+path.basename(file),buf);
+                        count++;
+                        if(count == imgList.length){
+                            console.log('   \n   Total Save: '.bold.green+saveSize.toFixed(2).bold.white+"KB".bold.white);
+                        }
                     })
-                    
                 }else{
                     if (body.error === 'TooManyRequests') {
                         console.log('   此KEY压缩图片数量已达限制');
@@ -106,7 +113,7 @@ Tinypng.prototype.run = function () {
                     }
                 };
             }));
-        })
+        });
     }
 
 };
@@ -178,8 +185,8 @@ module.exports = Tinypng;
 
 
 //调用
-// var tingpng = new Tinypng()
-//     .src('./')
-//     .dest('./')
-//     .key('api key')
-//     .run()
+var tingpng = new Tinypng()
+    .src('./temp')
+    // .dest('./')
+    .key('4O3SiMwhA6iJcEYzlEI8WYrIlTQZf3DS')
+    .run()

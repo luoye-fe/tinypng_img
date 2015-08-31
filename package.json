@@ -1,6 +1,6 @@
 {
   "name": "tinypng_img",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "调用TINYPNG压缩PNG/JPG图片",
   "main": "app.js",
   "scripts": {
