@@ -59,11 +59,9 @@ Tinypng.prototype.run = function () {
 
     var imgList = [];
 
-    
     if(fs.existsSync(src)){
         imgList = getImg(src);
     }
-
 
     if(imgList.length == 0){
         console.log("\n   未发现可压缩图片\n");
@@ -185,8 +183,8 @@ module.exports = Tinypng;
 
 
 //调用
-var tingpng = new Tinypng()
-    .src('./temp')
-    // .dest('./')
-    .key('4O3SiMwhA6iJcEYzlEI8WYrIlTQZf3DS')
-    .run()
+// var tingpng = new Tinypng()
+//     .src('./temp')
+//     // .dest('./')
+//     .key('<api key>')
+//     .run()
