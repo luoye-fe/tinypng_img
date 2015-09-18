@@ -1,6 +1,7 @@
 ﻿图片压缩
 tinypng
 
+注：为了检测是否被压缩过，修改了图片的文件尾为0作标记，使用的时候png修改回130。（其他图片格式的文件尾自测）
 
 20150831  
 统计压缩空间
@@ -11,7 +12,7 @@ tinypng
 
 安装方法
 
-	npm install tinypng -g
+	npm install tinypng_img -g
 
 
 
